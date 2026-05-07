@@ -91,9 +91,9 @@ app.post('/api/chat', async (req, res) => {
       
       if (latestMessage.match(/\b(leave|holiday|salary|onboarding|health|insurance|parental|sick|policy|flexible|work|remote|hours|benefits|pay)\b/)) {
         resolvedAgentId = 'HR-Agent';
-      } else if (latestMessage.match(/\b(password|laptop|vpn|network|software|hardware|login|access|wifi|computer|monitor|mouse|keyboard|printer|email)\b/)) {
+      } else if (latestMessage.match(/\b(password|internet|VPN|laptop|vpn|network|software|hardware|login|access|wifi|computer|monitor|mouse|keyboard|printer|email)\b/)) {
         resolvedAgentId = 'ITSupport-Agent';
-      } else if (latestMessage.match(/\b(compliance|audit|security|gdpr|regulation|legal|risk|privacy|governance)\b/)) {
+      } else if (latestMessage.match(/\b(compliance|corruption|bribery|DPO|Anti|Bribery|audit|security|gdpr|regulation|legal|risk|privacy|governance)\b/)) {
         resolvedAgentId = 'Compliance-Agent';
       }
     }

@@ -1,108 +1,59 @@
-/**
- * Agent Registry — Declarative metadata for all specialist agents.
- *
- * Each entry describes a Foundry IQ application agent: its environment-variable
- * keys, the domains it handles, and its relative priority when multiple agents
- * could answer a query.
- *
- * The orchestration engine uses this registry to:
- *   - Build the routing prompt sent to the AI router
- *   - Resolve env-var names → concrete app-name / model strings at runtime
- *   - Determine which agents participate in Fan-Out or Chain patterns
- */
+// ============================================================
+// orchestration/agentRegistry.js
+// ============================================================
+// Declarative registry of all agents in the system.
+// The router and pattern engine import helpers from here.
+// ============================================================
+
+// TODO: Export a const AGENT_REGISTRY object with four keys:
+//   orchestrator, hr, it, compliance
+//
+// Each entry must have:
+//   id           – The agent name as registered in Foundry (e.g. 'HR-Agent')
+//   displayName  – Human-readable label (e.g. 'HR Agent')
+//   appEnvKey    – The env var name for the agent app  (e.g. 'AGENT_APP_HR')
+//   modelEnvKey  – The env var name for the model      (e.g. 'AGENT_MODEL_HR')
+//   defaultApp   – Fallback app name if env var is unset
+//   defaultModel – Fallback model name if env var is unset (use 'gpt-4.1')
+//   domains      – Array of keywords this agent owns (used by keyword fallback)
+//   priority     – Numeric priority (orchestrator = 0, specialists = 2-3)
+//   description  – One sentence used in the routing system prompt
+//
+// Example domains for each agent:
+//   HR:         leave, holiday, salary, onboarding, flexible working, payroll, …
+//   IT:         password, VPN, laptop, network, wifi, software, hardware, login, …
+//   Compliance: compliance, GDPR, bribery, SOC2, data protection, ethics, …
+//   Orchestrator: [] (empty — does not own any domain)
 
 export const AGENT_REGISTRY = {
-  orchestrator: {
-    id: 'Orchestrator-Agent',
-    displayName: 'Orchestrator',
-    appEnvKey: 'AGENT_APP_ORCHESTRATOR',
-    modelEnvKey: 'AGENT_MODEL_ORCHESTRATOR',
-    defaultApp: 'Orchestrator-Agent',
-    defaultModel: 'gpt-4.1',
-    domains: [],          // meta-agent; does not own a domain
-    priority: 0,
-    description:
-      'Top-level orchestrator responsible for intent classification and response ' +
-      'synthesis in Fan-Out scenarios. Not used as a leaf specialist.',
-  },
+  // TODO: Fill in orchestrator entry
+  orchestrator: {},
 
-  hr: {
-    id: 'HR-Agent',
-    displayName: 'HR Agent',
-    appEnvKey: 'AGENT_APP_HR',
-    modelEnvKey: 'AGENT_MODEL_HR',
-    defaultApp: 'HR-Agent',
-    defaultModel: 'gpt-4.1',
-    domains: [
-      'leave', 'holiday', 'salary', 'onboarding', 'health insurance',
-      'parental leave', 'sick leave', 'flexible working', 'remote work',
-      'work hours', 'employee benefits', 'pay', 'payroll', 'performance review',
-      'recruitment', 'resignation', 'termination', 'probation',
-    ],
-    priority: 2,
-    description:
-      'Answers questions about HR policies, employee benefits, leave entitlements, ' +
-      'onboarding, compensation, and flexible-working arrangements.',
-  },
+  // TODO: Fill in hr entry
+  hr: {},
 
-  it: {
-    id: 'ITSupport-Agent',
-    displayName: 'IT Support Agent',
-    appEnvKey: 'AGENT_APP_IT',
-    modelEnvKey: 'AGENT_MODEL_IT',
-    defaultApp: 'ITSupport-Agent',
-    defaultModel: 'gpt-4.1',
-    domains: [
-      'password', 'VPN', 'laptop', 'network', 'wifi', 'internet', 'software',
-      'hardware', 'login', 'access', 'monitor', 'printer', 'email', 'computer',
-      'mouse', 'keyboard', 'account', 'two-factor', '2FA', 'remote desktop',
-      'installation', 'driver', 'reboot', 'crash', 'blue screen',
-    ],
-    priority: 2,
-    description:
-      'Handles IT troubleshooting: password resets, VPN issues, hardware setup, ' +
-      'software installations, network connectivity, and account access problems.',
-  },
+  // TODO: Fill in it entry
+  it: {},
 
-  compliance: {
-    id: 'Compliance-Agent',
-    displayName: 'Compliance Agent',
-    appEnvKey: 'AGENT_APP_COMPLIANCE',
-    modelEnvKey: 'AGENT_MODEL_COMPLIANCE',
-    defaultApp: 'Compliance-Agent',
-    defaultModel: 'gpt-4.1',
-    domains: [
-      'compliance', 'corruption', 'bribery', 'DPO', 'anti-bribery', 'audit',
-      'security policy', 'GDPR', 'regulation', 'legal', 'risk', 'privacy',
-      'governance', 'SOC2', 'data protection', 'whistleblower', 'ethics',
-      'code of conduct', 'sanctions', 'due diligence',
-    ],
-    priority: 3,   // highest priority — acts as gatekeeper in Chain pattern
-    description:
-      'Advises on regulatory compliance, GDPR, anti-bribery, SOC2, code of conduct, ' +
-      'data protection, and ethics policies. Serves as the compliance gatekeeper ' +
-      'in Sequential Chain scenarios.',
-  },
+  // TODO: Fill in compliance entry
+  compliance: {},
 };
 
-/** Returns all specialist agents (excludes the orchestrator meta-agent). */
+// TODO: Export function getSpecialists()
+//  Returns all registry entries except the Orchestrator.
 export function getSpecialists() {
-  return Object.values(AGENT_REGISTRY).filter(a => a.id !== 'Orchestrator-Agent');
+  // TODO: implement
 }
 
-/**
- * Resolves the concrete Foundry app-name and model for an agent entry,
- * reading from environment variables with sensible defaults.
- */
+// TODO: Export function resolveAgent(agentEntry)
+//  Returns a copy of agentEntry with 'app' and 'model' resolved
+//  from process.env (falling back to defaultApp / defaultModel).
 export function resolveAgent(agentEntry) {
-  return {
-    ...agentEntry,
-    app: process.env[agentEntry.appEnvKey] || agentEntry.defaultApp,
-    model: process.env[agentEntry.modelEnvKey] || agentEntry.defaultModel,
-  };
+  // TODO: implement
 }
 
-/** Finds a registry entry by its Foundry agent ID string, e.g. 'HR-Agent'. */
+// TODO: Export function findById(agentId)
+//  Finds and returns the registry entry whose id matches agentId.
 export function findById(agentId) {
-  return Object.values(AGENT_REGISTRY).find(a => a.id === agentId);
+  // TODO: implement
 }

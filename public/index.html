@@ -4,156 +4,81 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Foundry IQ — Agent Console</title>
-  <meta name="description" content="Chat with your AI-powered HR Agent built on Microsoft Foundry IQ" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- ───────── Animated background ───────── -->
-  <div class="bg-mesh" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-  </div>
 
-  <!-- ───────── Main layout ───────── -->
+  <!-- TODO: Add animated background blobs -->
+  <!--
+    <div class="bg-mesh" aria-hidden="true">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+  -->
+
+  <!-- TODO: Build the main app layout using class="app-layout" -->
   <div class="app-layout">
 
-    <!-- Sidebar -->
+    <!-- ── Sidebar ── -->
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand">
-        <div class="brand-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
-            <path d="M2 12l10 5 10-5"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="brand-title">Foundry IQ</h1>
-          <p class="brand-sub">Agent Console</p>
-        </div>
-      </div>
 
-      <div class="sidebar-section">
-        <h2 class="sidebar-label">Connected Agent</h2>
-        <div class="agent-card">
-          <div class="agent-status">
-            <span class="status-dot" id="statusDot"></span>
-            <span class="status-text" id="statusText">Checking…</span>
-          </div>
-          <div class="agent-selector-wrap">
-            <select id="agentSelector" class="agent-select">
-              <option value="Orchestrator-Agent" selected>Orchestrator (Auto-Routing)</option>
-              <option value="HR-Agent">HR-Agent</option>
-              <option value="ITSupport-Agent">IT Support Agent</option>
-              <option value="Compliance-Agent">Compliance Agent</option>
-            </select>
-          </div>
-          <div class="agent-detail">
-            <span class="detail-key">Version</span>
-            <span class="detail-val">3</span>
-          </div>
-          <div class="agent-detail">
-            <span class="detail-key">Protocol</span>
-            <span class="detail-val">Responses API</span>
-          </div>
-        </div>
-      </div>
+      <!-- TODO: Brand header with SVG icon, title "Foundry IQ", subtitle "Agent Console" -->
 
-      <div class="sidebar-section">
-        <h2 class="sidebar-label">Orchestration Pattern</h2>
-        <div class="pattern-card">
-          <select id="patternSelector" class="agent-select">
-            <option value="auto" selected>⚡ Auto (AI-selected)</option>
-            <option value="hub-and-spoke">🔵 Hub-and-Spoke</option>
-            <option value="fan-out">🟡 Fan-Out / Consensus</option>
-            <option value="chain">🟠 Sequential Chain</option>
-          </select>
-          <p class="pattern-hint-text">
-            <strong>Auto</strong> lets Foundry IQ choose the best pattern.<br>
-            <strong>Fan-Out</strong> queries all relevant agents in parallel.<br>
-            <strong>Chain</strong> gates the query through Compliance first.
-          </p>
-        </div>
-      </div>
+      <!-- TODO: Chats section
+           - Label "Chats"
+           - Button id="btnNewChat" with text "+ New Chat"
+           - Div id="chatSessions" class="chat-sessions"
+      -->
 
+      <!-- TODO: Connected Agent section
+           - Label "Connected Agent"
+           - Agent card showing status dot (id="statusDot"), agent name (id="agentName"),
+             and description (id="agentDesc")
+      -->
 
+      <!-- TODO: Select Agent section
+           - Label "Select Agent"
+           - <select id="agentSelector"> with options:
+               value=""           → Auto-Route (Orchestrator)
+               value="HR-Agent"   → HR Agent
+               value="ITSupport-Agent" → IT Support Agent
+               value="Compliance-Agent" → Compliance Agent
+      -->
 
-      <div class="sidebar-footer">
-        <button class="btn-clear" id="btnClear" title="Clear conversation">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-          </svg>
-          Clear Chat
-        </button>
-      </div>
+      <!-- TODO: Pattern section
+           - Label "Orchestration Pattern"
+           - <select id="patternSelector"> with options:
+               value="auto"        → Auto (AI decides)
+               value="hub-and-spoke" → Hub & Spoke
+               value="fan-out"     → Fan-Out
+               value="chain"       → Chain
+      -->
+
+      <!-- TODO: Clear button id="clearBtn" with text "Clear Chat" -->
+
     </aside>
 
-    <!-- Chat area -->
+    <!-- ── Main chat area ── -->
     <main class="chat-main">
-      <!-- Top bar -->
-      <header class="chat-header">
-        <button class="btn-menu" id="btnMenu" aria-label="Toggle sidebar">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-        </button>
-        <div class="header-title">
-          <h2>Multi-Agent Orchestration Console</h2>
-          <span class="header-badge">Foundry IQ</span>
-        </div>
-      </header>
 
-      <!-- Messages -->
-      <div class="chat-messages" id="chatMessages">
-        <!-- Welcome message -->
-        <div class="welcome-hero" id="welcomeHero">
-          <div class="welcome-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#grad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#818cf8"/>
-                  <stop offset="100%" style="stop-color:#c084fc"/>
-                </linearGradient>
-              </defs>
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-              <line x1="9" y1="9" x2="9.01" y2="9"/>
-              <line x1="15" y1="9" x2="15.01" y2="9"/>
-            </svg>
-          </div>
-          <h2 class="welcome-title">Hello! I'm your AI Orchestrator</h2>
-          <p class="welcome-desc">Ask me anything about HR, IT support, or compliance. I'll automatically route your question to the right specialist agent — or query multiple agents in parallel — powered by <strong>Microsoft Foundry IQ</strong>.</p>
-          <p class="welcome-hint">Select an orchestration pattern in the sidebar, then type your question below.</p>
-        </div>
-      </div>
+      <!-- TODO: Chat header bar with title "Multi-Agent Chat" and a span id="patternBadge" -->
 
-      <!-- Input area -->
-      <div class="chat-input-wrap">
-        <form class="chat-form" id="chatForm">
-          <div class="input-row">
-            <textarea
-              id="chatInput"
-              class="chat-input"
-              placeholder="Ask a question — the orchestrator will route it automatically…"
-              rows="1"
-              autocomplete="off"
-            ></textarea>
-            <button type="submit" class="btn-send" id="btnSend" aria-label="Send message">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-            </button>
-          </div>
-          <p class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift + Enter</kbd> for new line</p>
-        </form>
-      </div>
+      <!-- TODO: Chat messages area: <div id="chatMessages" class="chat-messages" role="log"> -->
+
+      <!-- TODO: Input form id="chatForm" with:
+           - <textarea id="chatInput" placeholder="Ask anything…" rows="1">
+           - <button type="submit" id="sendBtn">Send</button>
+      -->
+
     </main>
+
   </div>
 
+  <!-- Load app logic last -->
   <script src="app.js"></script>
 </body>
 </html>

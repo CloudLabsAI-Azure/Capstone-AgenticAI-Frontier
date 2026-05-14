@@ -14,12 +14,47 @@ hooks:
     windows:
       shell: pwsh
       run: |
+        $ErrorActionPreference = "Continue"
+
         if (Test-Path .env) {
           Write-Host "Loading variables from .env file..."
-          Get-Content .env | Where-Object { $_ -notmatch '^\s*#' -and $_ -match '=' } | ForEach-Object {
-            $name, $value = $_ -split '=', 2
-            azd env set $name.Trim() $value.Trim()
+
+          $imported = 0
+          Get-Content .env | ForEach-Object {
+            $line = $_.Trim()
+
+            if (-not $line -or $line.StartsWith('#') -or $line -notmatch '=') {
+              return
+            }
+
+            $name, $value = $line -split '=', 2
+            $name = $name.Trim()
+            $value = $value.Trim()
+
+            # Remove matching surrounding quotes from value.
+            if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+              $value = $value.Substring(1, $value.Length - 2)
+            }
+
+            if ($name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
+              Write-Warning "Skipping invalid variable name: $name"
+              return
+            }
+
+            try {
+              azd env set $name $value
+              if ($LASTEXITCODE -ne 0) {
+                Write-Warning "Failed to set '$name' in azd environment. Continuing."
+                return
+              }
+              $imported++
+            }
+            catch {
+              Write-Warning "Error setting '$name' in azd environment. Continuing."
+            }
           }
+
+          Write-Host "Imported $imported variables from .env."
         }
     posix:
       shell: sh
@@ -28,7 +63,7 @@ hooks:
           echo "Loading variables from .env file..."
           while IFS='=' read -r name value || [ -n "$name" ]; do
             # Skip comments and empty lines
-            if [[ $name != \#* ]] && [[ -n $name ]]; then
+            if [ -n "$name" ] && [ "${name#\#}" = "$name" ]; then
               azd env set "$name" "$value"
             fi
           done < .env

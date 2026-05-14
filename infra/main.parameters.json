@@ -38,6 +38,9 @@
     "AGENT_MODEL_COMPLIANCE": {
       "value": "${AGENT_MODEL_COMPLIANCE}"
     },
+    "AZURE_API_KEY": {
+      "value": "${AZURE_API_KEY}"
+    },
     "AZURE_CLIENT_ID": {
       "value": "${AZURE_CLIENT_ID}"
     },
@@ -49,3 +52,4 @@
     }
   }
 }
+

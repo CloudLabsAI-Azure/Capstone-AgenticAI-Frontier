@@ -12,7 +12,8 @@ const sidebar      = $('#sidebar');
 const welcomeHero  = $('#welcomeHero');
 const statusDot    = $('#statusDot');
 const statusText   = $('#statusText');
-const agentSelector = $('#agentSelector');
+const agentSelector   = $('#agentSelector');
+const patternSelector = $('#patternSelector');
 
 // ── State ─────────────────────────────────────────────────────────
 let conversationHistory = [];   // kept client-side (stateless API)
@@ -117,7 +118,7 @@ async function trackTicket(ticketId) {
     hideTyping();
 
     if (!res.ok) {
-      appendMessage('agent', `**[Answered by: ITSupport-Agent]**\n\n❌ Ticket **${ticketId}** was not found. Please check the ID and try again.`);
+      appendMessage('agent', `**[Answered by: ITSupport-Agent]**\n\n❌ Ticket **${ticketId}** was not found. Please check the ID and try again.`, [], null);
       return;
     }
 
@@ -182,7 +183,7 @@ async function trackTicket(ticketId) {
 
   } catch (err) {
     hideTyping();
-    appendMessage('agent', `Network error while fetching ticket: ${err.message}`, [], true);
+    appendMessage('agent', `Network error while fetching ticket: ${err.message}`, [], null, true);
   }
 }
 
@@ -264,7 +265,7 @@ function showTicketForm() {
 
   cancelBtn.addEventListener('click', () => {
     wrapper.remove();
-    appendMessage('agent', 'Ticket creation cancelled. Let me know if you need anything else!');
+    appendMessage('agent', 'Ticket creation cancelled. Let me know if you need anything else!', [], null);
     scrollToBottom();
   });
 
@@ -290,7 +291,7 @@ function showTicketForm() {
       const res = await fetch('/api/tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, user: name, priority, category })
+        body: JSON.stringify({ title, description, user: name, priority, category, agentId: 'ITSupport-Agent' })
       });
 
       const ticket = await res.json();
@@ -378,12 +379,17 @@ async function handleSubmit(e) {
 
   const agentId = agentSelector ? agentSelector.value : 'HR-Agent';
 
-  // Check if user wants to create a ticket (only for IT Support or Orchestrator)
-  if (isTicketCreationIntent(text) && (agentId === 'ITSupport-Agent' || agentId === 'Orchestrator-Agent')) {
-    appendMessage('agent', '**[Answered by: ITSupport-Agent]**\n\nSure! I can help you create a support ticket. Please fill out the form below with the required details.');
+  // Check if user wants to create a ticket — ONLY when ITSupport-Agent is active.
+  // The Orchestrator may resolve to IT, so check both selected and resolved agent.
+  const isITContext = agentId === 'ITSupport-Agent';
+  if (isTicketCreationIntent(text) && isITContext) {
+    appendMessage('agent', '**[ITSupport-Agent]**\n\nSure! I can raise a support ticket for you. Please fill in the details below.');
     showTicketForm();
     return;
   }
+
+  // If Orchestrator is selected and user asks about tickets, route through agent first
+  // (the agent will respond and the user can then create the ticket explicitly)
 
   // Check if user wants to track a ticket
   const trackId = getTicketTrackingId(text);
@@ -396,34 +402,30 @@ async function handleSubmit(e) {
   showTyping();
   scrollToBottom();
 
+  const patternHint = patternSelector ? patternSelector.value : 'auto';
+
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: conversationHistory, agentId })
+      body: JSON.stringify({ messages: conversationHistory, patternHint })
     });
 
     const data = await res.json();
     hideTyping();
 
     if (!res.ok) {
-      appendMessage('agent', data.error || 'Something went wrong.', [], true);
+      appendMessage('agent', data.error || 'Something went wrong.', [], null, true);
     } else {
-      let msg = data.message || 'No response from agent.';
-      if (data.resolvedAgentId) {
-        if (agentId === 'Orchestrator-Agent' && data.resolvedAgentId !== 'Orchestrator-Agent') {
-          msg = `**[Auto-Routed to: ${data.resolvedAgentId}]**\n\n` + msg;
-        } else {
-          msg = `**[Answered by: ${data.resolvedAgentId}]**\n\n` + msg;
-        }
-      }
+      const msg       = data.message || 'No response from agent.';
       const citations = data.citations || [];
+      const trace     = data.orchestrationTrace || null;
       conversationHistory.push({ role: 'assistant', content: msg });
-      appendMessage('agent', msg, citations);
+      appendMessage('agent', msg, citations, trace);
     }
   } catch (err) {
     hideTyping();
-    appendMessage('agent', `Network error: ${err.message}`, [], true);
+    appendMessage('agent', `Network error: ${err.message}`, [], null, true);
   } finally {
     setProcessing(false);
     scrollToBottom();
@@ -431,7 +433,7 @@ async function handleSubmit(e) {
 }
 
 // ── Render message ────────────────────────────────────────────────
-function appendMessage(role, text, citations = [], isError = false) {
+function appendMessage(role, text, citations = [], trace = null, isError = false) {
   const wrapper = document.createElement('div');
   wrapper.className = `message ${role}${isError ? ' msg-error' : ''}`;
 
@@ -441,6 +443,19 @@ function appendMessage(role, text, citations = [], isError = false) {
 
   const body = document.createElement('div');
   body.className = 'msg-body';
+
+  // Provenance badge (agent + pattern)
+  if (trace && role === 'agent') {
+    const badge = document.createElement('div');
+    badge.className = `provenance-badge pattern-${trace.pattern || 'hub-and-spoke'}`;
+    const patternIcon = { 'hub-and-spoke': '🔵', 'fan-out': '🟡', 'chain': '🟠' }[trace.pattern] || '⚪';
+    const agents = (trace.agentsInvoked || []).join(' → ');
+    badge.innerHTML = `<span class="pattern-icon">${patternIcon}</span>
+      <span class="pattern-name">${trace.pattern || 'hub-and-spoke'}</span>
+      <span class="pattern-sep">·</span>
+      <span class="agents-invoked">${escapeHtml(agents)}</span>`;
+    body.appendChild(badge);
+  }
 
   const content = document.createElement('div');
   content.className = 'msg-content';
@@ -466,11 +481,75 @@ function appendMessage(role, text, citations = [], isError = false) {
     body.appendChild(citWrap);
   }
 
+  // Orchestration Trace panel
+  if (trace && role === 'agent') {
+    body.appendChild(renderOrchTrace(trace));
+  }
+
   body.appendChild(time);
   wrapper.appendChild(avatar);
   wrapper.appendChild(body);
   chatMessages.appendChild(wrapper);
   scrollToBottom();
+}
+
+// ── Orchestration Trace Panel ─────────────────────────────────────
+function renderOrchTrace(trace) {
+  const panel = document.createElement('details');
+  panel.className = 'orch-trace';
+
+  const tierClass = `conf-${trace.confidenceTier || 'unknown'}`;
+  const confVal   = trace.confidence !== null && trace.confidence !== undefined
+    ? `${trace.confidence}%` : '—';
+  const latency   = trace.latencyMs !== null && trace.latencyMs !== undefined
+    ? `${trace.latencyMs} ms` : '—';
+
+  const agentTimeline = (trace.agentsInvoked || [])
+    .map((a, i) => `<span class="agent-step">${i > 0 ? '<span class="step-arrow">→</span>' : ''}${escapeHtml(a)}</span>`)
+    .join('');
+
+  const chainCtx = trace.complianceContext
+    ? `<div class="trace-row"><span class="trace-key">Compliance context</span><span class="trace-val trace-compliance">${escapeHtml(trace.complianceContext.slice(0, 160))}…</span></div>`
+    : '';
+
+  const fallbackNote = trace.fallbackUsed
+    ? `<div class="trace-row"><span class="trace-key">Routing mode</span><span class="trace-val trace-fallback">⚠ keyword fallback</span></div>`
+    : '';
+
+  panel.innerHTML = `
+    <summary class="orch-trace-summary">
+      <span class="trace-toggle-icon">⚙</span>
+      <span>Orchestration Trace</span>
+      <span class="trace-id">· ${(trace.traceId || '').slice(0, 8)}</span>
+    </summary>
+    <div class="orch-trace-body">
+      <div class="trace-row">
+        <span class="trace-key">Pattern</span>
+        <span class="trace-val trace-pattern">${escapeHtml(trace.pattern || '—')}</span>
+      </div>
+      <div class="trace-row">
+        <span class="trace-key">Agent pipeline</span>
+        <span class="trace-val agent-timeline">${agentTimeline || '—'}</span>
+      </div>
+      <div class="trace-row">
+        <span class="trace-key">Confidence</span>
+        <span class="trace-val ${tierClass}">${confVal}</span>
+        <div class="conf-bar-wrap"><div class="conf-bar ${tierClass}" style="width:${trace.confidence || 0}%"></div></div>
+      </div>
+      <div class="trace-row">
+        <span class="trace-key">Routing reason</span>
+        <span class="trace-val">${escapeHtml(trace.routingReason || '—')}</span>
+      </div>
+      <div class="trace-row">
+        <span class="trace-key">Latency</span>
+        <span class="trace-val">${latency}</span>
+      </div>
+      ${chainCtx}
+      ${fallbackNote}
+    </div>
+  `;
+
+  return panel;
 }
 
 // ── Typing indicator ──────────────────────────────────────────────

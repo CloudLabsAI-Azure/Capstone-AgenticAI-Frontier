@@ -63,6 +63,23 @@
         </div>
       </div>
 
+      <div class="sidebar-section">
+        <h2 class="sidebar-label">Orchestration Pattern</h2>
+        <div class="pattern-card">
+          <select id="patternSelector" class="agent-select">
+            <option value="auto" selected>⚡ Auto (AI-selected)</option>
+            <option value="hub-and-spoke">🔵 Hub-and-Spoke</option>
+            <option value="fan-out">🟡 Fan-Out / Consensus</option>
+            <option value="chain">🟠 Sequential Chain</option>
+          </select>
+          <p class="pattern-hint-text">
+            <strong>Auto</strong> lets Foundry IQ choose the best pattern.<br>
+            <strong>Fan-Out</strong> queries all relevant agents in parallel.<br>
+            <strong>Chain</strong> gates the query through Compliance first.
+          </p>
+        </div>
+      </div>
+
 
 
       <div class="sidebar-footer">
@@ -85,7 +102,7 @@
           </svg>
         </button>
         <div class="header-title">
-          <h2>HR Knowledge Assistant</h2>
+          <h2>Multi-Agent Orchestration Console</h2>
           <span class="header-badge">Foundry IQ</span>
         </div>
       </header>
@@ -108,9 +125,9 @@
               <line x1="15" y1="9" x2="15.01" y2="9"/>
             </svg>
           </div>
-          <h2 class="welcome-title">Hello! I'm your HR Assistant</h2>
-          <p class="welcome-desc">I can answer questions about company HR policies, leave rules, health plans, onboarding, and more — powered by <strong>Microsoft Foundry IQ</strong>.</p>
-          <p class="welcome-hint">Type your question below to get started.</p>
+          <h2 class="welcome-title">Hello! I'm your AI Orchestrator</h2>
+          <p class="welcome-desc">Ask me anything about HR, IT support, or compliance. I'll automatically route your question to the right specialist agent — or query multiple agents in parallel — powered by <strong>Microsoft Foundry IQ</strong>.</p>
+          <p class="welcome-hint">Select an orchestration pattern in the sidebar, then type your question below.</p>
         </div>
       </div>
 
@@ -121,7 +138,7 @@
             <textarea
               id="chatInput"
               class="chat-input"
-              placeholder="Ask the HR Agent a question…"
+              placeholder="Ask a question — the orchestrator will route it automatically…"
               rows="1"
               autocomplete="off"
             ></textarea>

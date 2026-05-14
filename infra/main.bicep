@@ -17,6 +17,9 @@ param AGENT_APP_COMPLIANCE string = 'Compliance-Agent'
 param AGENT_MODEL_COMPLIANCE string = 'gpt-4.1'
 
 @secure()
+param AZURE_API_KEY string
+
+@secure()
 param AZURE_CLIENT_ID string
 @secure()
 param AZURE_CLIENT_SECRET string
@@ -44,6 +47,7 @@ module resources 'resources.bicep' = {
     AGENT_MODEL_IT: AGENT_MODEL_IT
     AGENT_APP_COMPLIANCE: AGENT_APP_COMPLIANCE
     AGENT_MODEL_COMPLIANCE: AGENT_MODEL_COMPLIANCE
+    AZURE_API_KEY: AZURE_API_KEY
     AZURE_CLIENT_ID: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: AZURE_CLIENT_SECRET
     AZURE_TENANT_ID: AZURE_TENANT_ID
@@ -52,3 +56,4 @@ module resources 'resources.bicep' = {
 
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = resources.outputs.acrLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = resources.outputs.acrName
+output COSMOS_ENDPOINT string = resources.outputs.cosmosEndpoint

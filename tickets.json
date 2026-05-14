@@ -9,7 +9,17 @@
       "category": "Hardware",
       "status": "Open",
       "createdAt": "2026-05-05T09:50:15.232Z"
+    },
+    {
+      "id": "IT-1001",
+      "title": "My VPN is not working.",
+      "description": "My VPN is not working.",
+      "user": "John",
+      "priority": "Medium",
+      "category": "Hardware",
+      "status": "Open",
+      "createdAt": "2026-05-13T18:34:09.476Z"
     }
   ],
-  "nextId": 1001
+  "nextId": 1002
 }
